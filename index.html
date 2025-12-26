@@ -7,7 +7,7 @@
 
   <style>
     :root {
-      --primary: #b94716;
+      --primary: #a14112;       /* قريب من لون الشعار */
       --primary-dark: #6b2600;
       --bg: #f7f3ec;
       --card: #ffffff;
@@ -28,43 +28,47 @@
     header {
       background: radial-gradient(circle at top left, #ffb27b, var(--primary-dark));
       color: #fff;
-      padding: 14px 12px 10px;
+      padding: 10px 12px 6px;
       position: sticky;
       top: 0;
       z-index: 10;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
 
-    .header-main {
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .header-top {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 8px;
     }
 
     .header-logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
       object-fit: cover;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.4);
     }
 
     .header-text h1 {
       margin: 0;
-      font-size: 1.6rem;
+      font-size: 1.4rem;
     }
 
     .header-text p {
       margin: 2px 0 0;
-      font-size: 0.85rem;
-      opacity: 0.9;
+      font-size: 0.8rem;
+      opacity: 0.95;
     }
 
     .nav-tabs {
       display: flex;
-      margin-top: 8px;
+      margin-top: 10px;
       background: rgba(0,0,0,0.18);
       border-radius: 999px;
       padding: 3px;
@@ -78,6 +82,12 @@
       border-radius: 999px;
       cursor: pointer;
       color: #f5e5dd;
+      user-select: none;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .nav-tab:hover {
+      transform: translateY(-1px);
     }
 
     .nav-tab.active {
@@ -138,6 +148,12 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .menu-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
     }
 
     .menu-img {
@@ -192,11 +208,17 @@
       font-size: 0.8rem;
       cursor: pointer;
       font-family: inherit;
+      transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
     }
 
     .btn-primary {
       background: var(--primary);
       color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.18);
     }
 
     .btn-primary:hover {
@@ -232,6 +254,7 @@
     .card h2 {
       margin: 0 0 8px;
       font-size: 1rem;
+      color: var(--primary-dark);
     }
 
     .cart-empty {
@@ -260,19 +283,19 @@
       margin-top: 8px;
       font-weight: bold;
       text-align: left;
+      color: var(--primary-dark);
     }
 
     /* اهتزاز السلة */
-    #cartCard.shake {
-      animation: shake 0.35s ease-out;
+    .cart-bump {
+      animation: cartShake 0.35s ease;
     }
 
-    @keyframes shake {
+    @keyframes cartShake {
       0% { transform: translateX(0); }
-      20% { transform: translateX(-4px); }
-      40% { transform: translateX(4px); }
-      60% { transform: translateX(-3px); }
-      80% { transform: translateX(3px); }
+      25% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
       100% { transform: translateX(0); }
     }
 
@@ -372,37 +395,33 @@
     }
 
     .admin-filters {
-      display: none;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
+      display: flex;
       flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
     }
 
     .admin-filters select {
-      padding: 5px 8px;
-      border-radius: 8px;
+      padding: 4px 8px;
+      border-radius: 999px;
       border: 1px solid #ccc;
-      font-size: 0.8rem;
-      min-width: 130px;
       font-family: inherit;
+      font-size: 0.8rem;
     }
 
     .admin-orders {
       max-height: 380px;
       overflow-y: auto;
       font-size: 0.8rem;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
     }
 
     .admin-order {
-      background: #fffdf8;
-      border-radius: 10px;
-      border: 1px solid #f1d0aa;
-      padding: 8px 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-radius: 12px;
+      background: #fff7f1;
+      border: 1px solid #f0d0b3;
+      padding: 8px;
+      margin-bottom: 8px;
     }
 
     .admin-order-header {
@@ -425,15 +444,23 @@
     .badge-ready { background: #1976d2; }
     .badge-done { background: #388e3c; }
 
-    .admin-order-body div {
+    .admin-order-body-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
       margin-bottom: 2px;
     }
 
+    .admin-order-body-row span.label {
+      font-weight: 600;
+    }
+
     .admin-order-footer {
-      margin-top: 4px;
+      margin-top: 6px;
       display: flex;
       gap: 6px;
       align-items: center;
+      justify-content: space-between;
     }
 
     .admin-order-footer select {
@@ -543,33 +570,33 @@
       cursor: pointer;
     }
 
-    /* الفوتر */
-    .app-footer {
+    /* تذييل بسيط */
+    .footer {
       max-width: 960px;
       margin: 8px auto 16px;
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      color: #654327;
       text-align: center;
-      opacity: 0.9;
+      font-size: 0.72rem;
+      color: #777;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="header-main">
-    <!-- عدّل مسار الصورة حسب اسم ملف الشعار عندك -->
-    <img src="logo-jeddo-aseem.png" alt="مطعم جدو عاصم" class="header-logo">
-    <div class="header-text">
-      <h1>مطعم جدو عاصم</h1>
-      <p>اطلب أكلَك بسرعة… وخلي الباقي علينا 😋</p>
+  <div class="header-inner">
+    <div class="header-top">
+      <img src="logo-jeddo-aseem.png" alt="مطعم جدو عاصم" class="header-logo">
+      <div class="header-text">
+        <h1>مطعم جدو عاصم</h1>
+        <p>اطلب أكلَك بسرعة… وخلي الباقي علينا 😋</p>
+      </div>
     </div>
-  </div>
-  <div class="nav-tabs">
-    <div class="nav-tab active" data-tab="orderTab">اطلب الآن</div>
-    <div class="nav-tab" data-tab="trackTab">تتبع الطلب</div>
-    <div class="nav-tab" data-tab="adminTab">لوحة الإدارة</div>
+
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-tab="orderTab">اطلب الآن</div>
+      <div class="nav-tab" data-tab="trackTab">تتبع الطلب</div>
+      <div class="nav-tab" data-tab="adminTab">لوحة الإدارة</div>
+    </div>
   </div>
 </header>
 
@@ -661,23 +688,25 @@
         <input type="password" id="adminPassword" placeholder="كلمة سر الإدارة">
         <button class="btn btn-primary" id="adminLoginBtn">دخول</button>
       </div>
-
-      <div class="admin-filters" id="adminFilters">
-        <select id="statusFilter">
-          <option value="">كل الحالات</option>
+      <div class="admin-filters">
+        <span>فلتر الحالة:</span>
+        <select id="adminStatusFilter">
+          <option value="ALL">كل الحالات</option>
           <option value="جديد">جديد</option>
           <option value="قيد التحضير">قيد التحضير</option>
           <option value="جاهز">جاهز</option>
           <option value="تم التسليم">تم التسليم</option>
         </select>
-        <button class="btn btn-ghost" id="refreshAdminBtn">تحديث القائمة</button>
       </div>
-
       <div id="adminStatus" class="status-message"></div>
       <div id="adminOrders" class="admin-orders"></div>
     </div>
   </section>
 
+</div>
+
+<div class="footer">
+  مطعم جدو عاصم © 2025 — تم تطوير هذا التطبيق بواسطة محمود البردان · 0957482415
 </div>
 
 <!-- زر مساعد الذكاء -->
@@ -696,18 +725,14 @@
   </div>
 </div>
 
-<div class="app-footer">
-  © 2025 # 0957482415 # مطعم جدو عاصم – تم تطوير هذا التطبيق بواسطة محمود البرادان.
-</div>
-
 <script>
-  // ضع هنا رابط Web App من Apps Script
+  // رابط Web App من Apps Script (العامِل حالياً)
   const API_URL = 'https://script.google.com/macros/s/AKfycbwM8PkfuDyx3OqCtnuVeTNC5BDTJH4zqnrxXIvt46lIKVkzf_yd-82SkA92VynPVwo3/exec';
 
   let MENU = [];
   let CART = [];
   let ADMIN_TOKEN = '';
-  let ADMIN_ORDERS = [];
+  let ADMIN_ORDERS = []; // كاش الطلبات في لوحة الإدارة
 
   /*********** مساعدات عامة ***********/
   function escapeHtml_(str) {
@@ -845,7 +870,14 @@
       });
     }
     renderCart();
-    triggerCartShake();
+    bumpCartAnimation_();
+  }
+
+  function bumpCartAnimation_() {
+    const cartCard = document.getElementById('cartCard');
+    cartCard.classList.remove('cart-bump');
+    void cartCard.offsetWidth; // إعادة تشغيل الأنيميشن
+    cartCard.classList.add('cart-bump');
   }
 
   function changeQty(itemId, delta) {
@@ -891,15 +923,6 @@
     totalDiv.textContent = 'المجموع: ' + total + ' ل.س';
   }
 
-  function triggerCartShake() {
-    const card = document.getElementById('cartCard');
-    if (!card) return;
-    card.classList.remove('shake');
-    void card.offsetWidth; // إعادة تشغيل الأنيميشن
-    card.classList.add('shake');
-    setTimeout(() => card.classList.remove('shake'), 400);
-  }
-
   /*********** إرسال الطلب ***********/
   async function submitOrder() {
     if (!CART.length) {
@@ -932,7 +955,7 @@
     showStatus('جاري إرسال الطلب...', true);
 
     try {
-      // نستخدم no-cors لتفادي مشاكل CORS للـ POST
+      // نرسل الطلب بوضع no-cors لتفادي مشكلة CORS
       await fetch(API_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -1057,53 +1080,55 @@
         return;
       }
 
-      const orders = data.orders || [];
-      ADMIN_ORDERS = orders;
-
-      if (!orders.length) {
-        listDiv.textContent = 'لا توجد طلبات حالياً.';
-        statusDiv.textContent = '';
-        document.getElementById('adminFilters').style.display = 'none';
-        return;
-      }
-
-      statusDiv.textContent = 'تم تحميل ' + orders.length + ' طلب.';
+      ADMIN_ORDERS = data.orders || [];
+      statusDiv.textContent = 'تم تحميل ' + ADMIN_ORDERS.length + ' طلب.';
       statusDiv.className = 'status-message success';
 
-      document.getElementById('adminFilters').style.display = 'flex';
-      const currentFilter = document.getElementById('statusFilter').value;
-      applyAdminFilter(currentFilter);
-
+      renderAdminOrdersList_();
     } catch (err) {
       statusDiv.textContent = 'حدث خطأ في تحميل الطلبات: ' + err.message;
       statusDiv.className = 'status-message error';
     }
   }
 
-  function renderAdminOrders(orders) {
+  function renderAdminOrdersList_() {
     const listDiv = document.getElementById('adminOrders');
-    if (!orders.length) {
-      listDiv.textContent = 'لا توجد طلبات بهذه الحالة.';
+    const filter = document.getElementById('adminStatusFilter').value;
+    listDiv.innerHTML = '';
+
+    if (!ADMIN_ORDERS.length) {
+      listDiv.textContent = 'لا توجد طلبات حالياً.';
       return;
     }
+
+    // ترتيب من الأحدث إلى الأقدم
+    const orders = [...ADMIN_ORDERS].sort(
+      (a,b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
+
     let html = '';
-    orders
-      .slice()
-      .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .forEach(o => {
-        html += renderAdminOrderRow_(o);
-      });
-    listDiv.innerHTML = html;
+    orders.forEach(o => {
+      const status = o.status || 'جديد';
+      if (filter !== 'ALL' && status !== filter) return;
+      html += renderAdminOrderRow_(o);
+    });
+
+    if (!html) {
+      listDiv.textContent = 'لا توجد طلبات بهذه الحالة.';
+    } else {
+      listDiv.innerHTML = html;
+    }
   }
 
   function renderAdminOrderRow_(o) {
+    const status = o.status || 'جديد';
     const badgeClass = (s => {
       if (s === 'جديد') return 'badge-new';
       if (s === 'قيد التحضير') return 'badge-preparing';
       if (s === 'جاهز') return 'badge-ready';
       if (s === 'تم التسليم') return 'badge-done';
       return 'badge-new';
-    })(o.status || 'جديد');
+    })(status);
 
     const itemsPreview = (() => {
       try {
@@ -1118,25 +1143,53 @@
       <div class="admin-order" data-id="${o.order_id}">
         <div class="admin-order-header">
           <div>رقم: ${o.order_id}</div>
-          <div><span class="admin-badge ${badgeClass}">${o.status || 'جديد'}</span></div>
+          <div><span class="admin-badge ${badgeClass}">${status}</span></div>
         </div>
+
         <div class="admin-order-body">
-          <div><strong>الاسم:</strong> ${escapeHtml_(o.customerName)}</div>
-          <div><strong>هاتف:</strong> ${escapeHtml_(o.phone)}</div>
-          <div><strong>العنوان:</strong> ${escapeHtml_(o.address)}</div>
-          <div><strong>النوع:</strong> ${escapeHtml_(o.delivery)}</div>
-          <div><strong>الملاحظات:</strong> ${escapeHtml_(o.notes)}</div>
-          <div><strong>الأصناف:</strong> ${escapeHtml_(itemsPreview)}</div>
-          <div><strong>التاريخ:</strong> ${escapeHtml_(formatDateTime_(o.timestamp))}</div>
-          <div><strong>المجموع:</strong> ${o.total} ل.س</div>
+          <div class="admin-order-body-row">
+            <span class="label">الاسم:</span>
+            <span>${escapeHtml_(o.customerName)}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">هاتف:</span>
+            <span>${escapeHtml_(o.phone)}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">العنوان:</span>
+            <span>${escapeHtml_(o.address)}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">النوع:</span>
+            <span>${escapeHtml_(o.delivery)}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">ملاحظات:</span>
+            <span>${escapeHtml_(o.notes)}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">الأصناف:</span>
+            <span>${escapeHtml_(itemsPreview)}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">التاريخ:</span>
+            <span>${escapeHtml_(formatDateTime_(o.timestamp))}</span>
+          </div>
+          <div class="admin-order-body-row">
+            <span class="label">المجموع:</span>
+            <span>${o.total} ل.س</span>
+          </div>
         </div>
+
         <div class="admin-order-footer">
-          <select onchange="changeAdminStatus('${o.order_id}', this.value)">
-            <option value="جديد" ${o.status === 'جديد' ? 'selected' : ''}>جديد</option>
-            <option value="قيد التحضير" ${o.status === 'قيد التحضير' ? 'selected' : ''}>قيد التحضير</option>
-            <option value="جاهز" ${o.status === 'جاهز' ? 'selected' : ''}>جاهز</option>
-            <option value="تم التسليم" ${o.status === 'تم التسليم' ? 'selected' : ''}>تم التسليم</option>
-          </select>
+          <div>
+            <select onchange="changeAdminStatus('${o.order_id}', this.value)">
+              <option value="جديد" ${status === 'جديد' ? 'selected' : ''}>جديد</option>
+              <option value="قيد التحضير" ${status === 'قيد التحضير' ? 'selected' : ''}>قيد التحضير</option>
+              <option value="جاهز" ${status === 'جاهز' ? 'selected' : ''}>جاهز</option>
+              <option value="تم التسليم" ${status === 'تم التسليم' ? 'selected' : ''}>تم التسليم</option>
+            </select>
+          </div>
           <button class="btn btn-ghost" onclick="refreshSingleOrder('${o.order_id}')">تحديث</button>
         </div>
       </div>
@@ -1157,17 +1210,15 @@
         })
       });
 
+      // تحديث الحالة في الكاش المحلي
+      const target = ADMIN_ORDERS.find(o => o.order_id === orderId);
+      if (target) target.status = newStatus;
+
+      renderAdminOrdersList_();
+
       document.getElementById('adminStatus').textContent =
         'تم تحديث حالة الطلب ' + orderId + ' إلى "' + newStatus + '".';
       document.getElementById('adminStatus').className = 'status-message success';
-
-      // تحديث النسخة المحلية
-      ADMIN_ORDERS = ADMIN_ORDERS.map(o =>
-        o.order_id === orderId ? { ...o, status: newStatus } : o
-      );
-      const currentFilter = document.getElementById('statusFilter').value;
-      applyAdminFilter(currentFilter);
-
     } catch (err) {
       document.getElementById('adminStatus').textContent =
         'خطأ في تحديث الحالة (تحقق من الاتصال بالإنترنت).';
@@ -1179,19 +1230,8 @@
     await loadAdminOrders();
   }
 
-  function applyAdminFilter(statusVal) {
-    let list = ADMIN_ORDERS || [];
-    if (statusVal) {
-      list = list.filter(o => (o.status || 'جديد') === statusVal);
-    }
-    renderAdminOrders(list);
-  }
-
   document.getElementById('adminLoginBtn').addEventListener('click', adminLogin);
-  document.getElementById('statusFilter').addEventListener('change', e => {
-    applyAdminFilter(e.target.value);
-  });
-  document.getElementById('refreshAdminBtn').addEventListener('click', loadAdminOrders);
+  document.getElementById('adminStatusFilter').addEventListener('change', renderAdminOrdersList_);
 
   /*********** مساعد الذكاء ***********/
   function toggleAiPanel() {
