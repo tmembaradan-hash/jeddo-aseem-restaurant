@@ -28,29 +28,44 @@
     header {
       background: radial-gradient(circle at top left, #ffb27b, var(--primary-dark));
       color: #fff;
-      padding: 18px 12px 10px;
-      text-align: center;
+      padding: 14px 12px 10px;
       position: sticky;
       top: 0;
       z-index: 10;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 1.5rem;
+    .header-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
-    header p {
-      margin: 4px 0 0;
+    .header-logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .header-text h1 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+    .header-text p {
+      margin: 2px 0 0;
       font-size: 0.85rem;
       opacity: 0.9;
     }
 
     .nav-tabs {
       display: flex;
-      margin-top: 10px;
-      background: rgba(0,0,0,0.15);
+      margin-top: 8px;
+      background: rgba(0,0,0,0.18);
       border-radius: 999px;
       padding: 3px;
     }
@@ -247,6 +262,20 @@
       text-align: left;
     }
 
+    /* اهتزاز السلة */
+    #cartCard.shake {
+      animation: shake 0.35s ease-out;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+      100% { transform: translateX(0); }
+    }
+
     .checkout-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -342,15 +371,38 @@
       font-family: inherit;
     }
 
+    .admin-filters {
+      display: none;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .admin-filters select {
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+      min-width: 130px;
+      font-family: inherit;
+    }
+
     .admin-orders {
       max-height: 380px;
       overflow-y: auto;
       font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .admin-order {
-      border-bottom: 1px solid #eee;
-      padding: 6px 0;
+      background: #fffdf8;
+      border-radius: 10px;
+      border: 1px solid #f1d0aa;
+      padding: 8px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
     .admin-order-header {
@@ -358,6 +410,7 @@
       justify-content: space-between;
       gap: 6px;
       font-weight: 600;
+      margin-bottom: 4px;
     }
 
     .admin-badge {
@@ -372,8 +425,8 @@
     .badge-ready { background: #1976d2; }
     .badge-done { background: #388e3c; }
 
-    .admin-order-body {
-      margin-top: 4px;
+    .admin-order-body div {
+      margin-bottom: 2px;
     }
 
     .admin-order-footer {
@@ -490,13 +543,29 @@
       cursor: pointer;
     }
 
+    /* الفوتر */
+    .app-footer {
+      max-width: 960px;
+      margin: 8px auto 16px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      color: #654327;
+      text-align: center;
+      opacity: 0.9;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>مطعم جدو عاصم</h1>
-  <p>اطلب أكلَك بسرعة… وخلي الباقي علينا 😋</p>
+  <div class="header-main">
+    <!-- عدّل مسار الصورة حسب اسم ملف الشعار عندك -->
+    <img src="logo-jeddo-aseem.png" alt="مطعم جدو عاصم" class="header-logo">
+    <div class="header-text">
+      <h1>مطعم جدو عاصم</h1>
+      <p>اطلب أكلَك بسرعة… وخلي الباقي علينا 😋</p>
+    </div>
+  </div>
   <div class="nav-tabs">
     <div class="nav-tab active" data-tab="orderTab">اطلب الآن</div>
     <div class="nav-tab" data-tab="trackTab">تتبع الطلب</div>
@@ -524,7 +593,7 @@
       </div>
 
       <div>
-        <div class="card">
+        <div class="card" id="cartCard">
           <h2>سلة الطلب</h2>
           <div id="cart-content"></div>
           <div class="cart-total" id="cart-total"></div>
@@ -592,6 +661,18 @@
         <input type="password" id="adminPassword" placeholder="كلمة سر الإدارة">
         <button class="btn btn-primary" id="adminLoginBtn">دخول</button>
       </div>
+
+      <div class="admin-filters" id="adminFilters">
+        <select id="statusFilter">
+          <option value="">كل الحالات</option>
+          <option value="جديد">جديد</option>
+          <option value="قيد التحضير">قيد التحضير</option>
+          <option value="جاهز">جاهز</option>
+          <option value="تم التسليم">تم التسليم</option>
+        </select>
+        <button class="btn btn-ghost" id="refreshAdminBtn">تحديث القائمة</button>
+      </div>
+
       <div id="adminStatus" class="status-message"></div>
       <div id="adminOrders" class="admin-orders"></div>
     </div>
@@ -614,6 +695,11 @@
     <button id="aiSendBtn">إرسال</button>
   </div>
 </div>
+
+<div class="app-footer">
+  © 2025 مطعم جدو عاصم – تم تطوير هذا التطبيق بواسطة محمد البرادان.
+</div>
+
 <script>
   // ضع هنا رابط Web App من Apps Script
   const API_URL = 'https://script.google.com/macros/s/AKfycbwM8PkfuDyx3OqCtnuVeTNC5BDTJH4zqnrxXIvt46lIKVkzf_yd-82SkA92VynPVwo3/exec';
@@ -621,6 +707,7 @@
   let MENU = [];
   let CART = [];
   let ADMIN_TOKEN = '';
+  let ADMIN_ORDERS = [];
 
   /*********** مساعدات عامة ***********/
   function escapeHtml_(str) {
@@ -758,6 +845,7 @@
       });
     }
     renderCart();
+    triggerCartShake();
   }
 
   function changeQty(itemId, delta) {
@@ -803,85 +891,70 @@
     totalDiv.textContent = 'المجموع: ' + total + ' ل.س';
   }
 
-/*********** إرسال الطلب ***********/
-async function submitOrder() {
-  if (!CART.length) {
-    showStatus('السلة فارغة، أضف أصنافاً أولاً.', false);
-    return;
+  function triggerCartShake() {
+    const card = document.getElementById('cartCard');
+    if (!card) return;
+    card.classList.remove('shake');
+    void card.offsetWidth; // إعادة تشغيل الأنيميشن
+    card.classList.add('shake');
+    setTimeout(() => card.classList.remove('shake'), 400);
   }
 
-  const customerName = document.getElementById('customerName').value.trim();
-  let phone = document.getElementById('phone').value.trim();
-  const address = document.getElementById('address').value.trim();
-  const delivery = document.getElementById('delivery').value;
-  const notes = document.getElementById('notes').value.trim();
+  /*********** إرسال الطلب ***********/
+  async function submitOrder() {
+    if (!CART.length) {
+      showStatus('السلة فارغة، أضف أصنافاً أولاً.', false);
+      return;
+    }
 
-  if (!customerName) {
-    showStatus('الرجاء إدخال الاسم.', false);
-    return;
+    const customerName = document.getElementById('customerName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const delivery = document.getElementById('delivery').value;
+    const notes = document.getElementById('notes').value.trim();
+
+    if (!customerName || !phone) {
+      showStatus('الرجاء إدخال الاسم ورقم الموبايل.', false);
+      return;
+    }
+
+    const total = CART.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const order = {
+      customerName,
+      phone,
+      address,
+      delivery,
+      notes,
+      items: CART,
+      total
+    };
+
+    showStatus('جاري إرسال الطلب...', true);
+
+    try {
+      // نستخدم no-cors لتفادي مشاكل CORS للـ POST
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ action: 'submitOrder', order })
+      });
+
+      showStatus(
+        'تم إرسال الطلب بنجاح 🎉 سيتم التواصل معك لتأكيد الطلب. المجموع: ' + total + ' ل.س',
+        true
+      );
+      CART = [];
+      renderCart();
+      document.getElementById('notes').value = '';
+
+      // حفظ بيانات الزبون محلياً لتسهيل الطلب القادم
+      localStorage.setItem('customerPhone', phone);
+      localStorage.setItem('customerName', customerName);
+      localStorage.setItem('customerAddress', address);
+    } catch (err) {
+      showStatus('تعذر إرسال الطلب (مشكلة في الاتصال بالإنترنت). حاول مرة أخرى.', false);
+    }
   }
-
-  // 🔹 تنظيف رقم الموبايل من أي رموز غير أرقام
-  phone = phone.replace(/\D/g, '');
-
-  // 🔹 لو المستخدم كتب 9 أرقام وبدأت بـ 9 → نضيف 0 في البداية (مثال: 957... → 0957...)
-  if (phone.length === 9 && phone.startsWith('9')) {
-    phone = '0' + phone;
-  }
-
-  // 🔹 التحقق: يجب أن يكون بالشكل 09XXXXXXXX (10 أرقام ويبدأ بـ 09)
-  if (!/^09\d{8}$/.test(phone)) {
-    showStatus('رقم الموبايل غير صحيح، يجب أن يكون مثل: 09XXXXXXXX', false);
-    return;
-  }
-
-  // نحدّث الحقل بالقيمة المنسّقة
-  document.getElementById('phone').value = phone;
-
-  const total = CART.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const order = {
-    customerName,
-    phone,
-    address,
-    delivery,
-    notes,
-    items: CART,
-    total
-  };
-
-  const btn = document.getElementById('submitOrderBtn');
-  btn.disabled = true;
-  btn.textContent = 'جاري إرسال الطلب...';
-  showStatus('', true);
-
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify({ action: 'submitOrder', order })
-    });
-
-    showStatus(
-      'تم إرسال الطلب بنجاح 🎉 سيتم التواصل معك لتأكيد الطلب. المجموع: ' + total + ' ل.س',
-      true
-    );
-
-    CART = [];
-    renderCart();
-    document.getElementById('notes').value = '';
-
-    // حفظ بيانات الزبون محلياً لتسهيل الطلب القادم
-    localStorage.setItem('customerPhone', phone);
-    localStorage.setItem('customerName', customerName);
-    localStorage.setItem('customerAddress', address);
-  } catch (err) {
-    showStatus('تعذر إرسال الطلب (مشكلة في الاتصال بالإنترنت). حاول مرة أخرى.', false);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'إرسال الطلب';
-  }
-}
-
 
   function showStatus(msg, success) {
     const s = document.getElementById('status');
@@ -891,79 +964,53 @@ async function submitOrder() {
 
   document.getElementById('submitOrderBtn').addEventListener('click', submitOrder);
 
-/*********** تتبع الطلب ***********/
-async function trackOrders() {
-  const orderId = document.getElementById('trackOrderId').value.trim();
-  const phone = document.getElementById('trackPhone').value.trim();
-  const resultDiv = document.getElementById('trackResult');
-  resultDiv.textContent = 'جاري البحث...';
+  /*********** تتبع الطلب ***********/
+  async function trackOrders() {
+    const orderId = document.getElementById('trackOrderId').value.trim();
+    const phone = document.getElementById('trackPhone').value.trim();
+    const resultDiv = document.getElementById('trackResult');
+    resultDiv.textContent = 'جاري البحث...';
 
-  if (!orderId && !phone) {
-    resultDiv.textContent = 'أدخل رقم الطلب أو رقم الموبايل.';
-    return;
-  }
-
-  try {
-    const params = new URLSearchParams();
-    params.set('action', 'trackOrders');
-    if (orderId) params.set('orderId', orderId);
-    if (phone) params.set('phone', phone);
-
-    const res = await fetch(API_URL + '?' + params.toString());
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'خطأ في التتبع');
-
-    let orders = data.orders || [];
-    if (!orders.length) {
-      resultDiv.textContent = 'لا توجد طلبات مطابقة.';
+    if (!orderId && !phone) {
+      resultDiv.textContent = 'أدخل رقم الطلب أو رقم الموبايل.';
       return;
     }
 
-    // 🔹 ترتيب من الأحدث إلى الأقدم (احتياطاً)
-    orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    try {
+      const params = new URLSearchParams();
+      params.set('action', 'trackOrders');
+      if (orderId) params.set('orderId', orderId);
+      if (phone) params.set('phone', phone);
 
-    let html = '';
-    orders.forEach((o, idx) => {
-      const badge = getStatusBadge_(o.status);
+      const res = await fetch(API_URL + '?' + params.toString());
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'خطأ في التتبع');
 
-      // نحاول قراءة الأصناف من itemsJson
-      let itemsHtml = '';
-      try {
-        const items = JSON.parse(o.itemsJson || '[]');
-        if (items.length) {
-          itemsHtml = '<ul style="margin:4px 0 0; padding-right:18px; font-size:0.8rem;">' +
-            items.map(i => `<li>${escapeHtml_(i.name)} × ${i.qty} = ${i.price * i.qty} ل.س</li>`).join('') +
-            '</ul>';
-        }
-      } catch (e) {
-        // تجاهل الخطأ ونتركها فارغة
+      const orders = data.orders || [];
+      if (!orders.length) {
+        resultDiv.textContent = 'لا توجد طلبات مطابقة.';
+        return;
       }
 
-      const isLatest = (idx === 0);
-      html += `
-        <div class="track-card">
-          ${isLatest ? '<div style="font-size:0.8rem; color:#b94716; margin-bottom:4px;">🔔 هذا هو آخر طلب مسجّل لهذا الرقم</div>' : ''}
-          <div><strong>رقم الطلب:</strong> ${o.order_id}</div>
-          <div><strong>الاسم:</strong> ${escapeHtml_(o.customerName || '')}</div>
-          <div><strong>الهاتف:</strong> ${escapeHtml_(o.phone || '')}</div>
-          <div><strong>العنوان:</strong> ${escapeHtml_(o.address || '')}</div>
-          <div><strong>طريقة الاستلام:</strong> ${escapeHtml_(o.delivery || '')}</div>
-          <div><strong>الملاحظات:</strong> ${escapeHtml_(o.notes || '')}</div>
-          <div><strong>التاريخ:</strong> ${escapeHtml_(formatDateTime_(o.timestamp))}</div>
-          <div><strong>الحالة:</strong> <span class="track-status">${badge}</span></div>
-          <div><strong>المجموع:</strong> ${o.total} ل.س</div>
-          ${itemsHtml ? '<div><strong>الأصناف:</strong>' + itemsHtml + '</div>' : ''}
-        </div>
-      `;
-    });
+      let html = '';
+      orders.forEach(o => {
+        const badge = getStatusBadge_(o.status);
+        html += `
+          <div class="track-card">
+            <div><strong>رقم الطلب:</strong> ${o.order_id}</div>
+            <div><strong>التاريخ:</strong> ${escapeHtml_(formatDateTime_(o.timestamp))}</div>
+            <div><strong>الحالة:</strong> <span class="track-status">${badge}</span></div>
+            <div><strong>المجموع:</strong> ${o.total} ل.س</div>
+          </div>
+        `;
+      });
 
-    resultDiv.innerHTML = html;
+      resultDiv.innerHTML = html;
 
-  } catch (err) {
-    resultDiv.textContent = 'حدث خطأ: ' + err.message;
+    } catch (err) {
+      resultDiv.textContent = 'حدث خطأ: ' + err.message;
+    }
   }
-}
-
 
   function getStatusBadge_(status) {
     const s = status || 'جديد';
@@ -1011,26 +1058,42 @@ async function trackOrders() {
       }
 
       const orders = data.orders || [];
+      ADMIN_ORDERS = orders;
+
       if (!orders.length) {
         listDiv.textContent = 'لا توجد طلبات حالياً.';
         statusDiv.textContent = '';
+        document.getElementById('adminFilters').style.display = 'none';
         return;
       }
 
       statusDiv.textContent = 'تم تحميل ' + orders.length + ' طلب.';
       statusDiv.className = 'status-message success';
 
-      let html = '';
-      orders.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-      orders.forEach(o => {
-        html += renderAdminOrderRow_(o);
-      });
-      listDiv.innerHTML = html;
+      document.getElementById('adminFilters').style.display = 'flex';
+      const currentFilter = document.getElementById('statusFilter').value;
+      applyAdminFilter(currentFilter);
 
     } catch (err) {
       statusDiv.textContent = 'حدث خطأ في تحميل الطلبات: ' + err.message;
       statusDiv.className = 'status-message error';
     }
+  }
+
+  function renderAdminOrders(orders) {
+    const listDiv = document.getElementById('adminOrders');
+    if (!orders.length) {
+      listDiv.textContent = 'لا توجد طلبات بهذه الحالة.';
+      return;
+    }
+    let html = '';
+    orders
+      .slice()
+      .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .forEach(o => {
+        html += renderAdminOrderRow_(o);
+      });
+    listDiv.innerHTML = html;
   }
 
   function renderAdminOrderRow_(o) {
@@ -1080,36 +1143,55 @@ async function trackOrders() {
     `;
   }
 
-async function changeAdminStatus(orderId, newStatus) {
-  if (!ADMIN_TOKEN) return;
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify({
-        action: 'updateOrderStatus',
-        adminPassword: ADMIN_TOKEN,
-        orderId,
-        newStatus
-      })
-    });
+  async function changeAdminStatus(orderId, newStatus) {
+    if (!ADMIN_TOKEN) return;
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+          action: 'updateOrderStatus',
+          adminPassword: ADMIN_TOKEN,
+          orderId,
+          newStatus
+        })
+      });
 
-    document.getElementById('adminStatus').textContent =
-      'تم تحديث حالة الطلب ' + orderId + ' إلى "' + newStatus + '".';
-    document.getElementById('adminStatus').className = 'status-message success';
-  } catch (err) {
-    document.getElementById('adminStatus').textContent =
-      'خطأ في تحديث الحالة (تحقق من الاتصال بالإنترنت).';
-    document.getElementById('adminStatus').className = 'status-message error';
+      document.getElementById('adminStatus').textContent =
+        'تم تحديث حالة الطلب ' + orderId + ' إلى "' + newStatus + '".';
+      document.getElementById('adminStatus').className = 'status-message success';
+
+      // تحديث النسخة المحلية
+      ADMIN_ORDERS = ADMIN_ORDERS.map(o =>
+        o.order_id === orderId ? { ...o, status: newStatus } : o
+      );
+      const currentFilter = document.getElementById('statusFilter').value;
+      applyAdminFilter(currentFilter);
+
+    } catch (err) {
+      document.getElementById('adminStatus').textContent =
+        'خطأ في تحديث الحالة (تحقق من الاتصال بالإنترنت).';
+      document.getElementById('adminStatus').className = 'status-message error';
+    }
   }
-}
-
 
   async function refreshSingleOrder(orderId) {
     await loadAdminOrders();
   }
 
+  function applyAdminFilter(statusVal) {
+    let list = ADMIN_ORDERS || [];
+    if (statusVal) {
+      list = list.filter(o => (o.status || 'جديد') === statusVal);
+    }
+    renderAdminOrders(list);
+  }
+
   document.getElementById('adminLoginBtn').addEventListener('click', adminLogin);
+  document.getElementById('statusFilter').addEventListener('change', e => {
+    applyAdminFilter(e.target.value);
+  });
+  document.getElementById('refreshAdminBtn').addEventListener('click', loadAdminOrders);
 
   /*********** مساعد الذكاء ***********/
   function toggleAiPanel() {
