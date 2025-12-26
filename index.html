@@ -803,7 +803,7 @@
     totalDiv.textContent = 'المجموع: ' + total + ' ل.س';
   }
 
-  /*********** إرسال الطلب ***********/
+/*********** إرسال الطلب ***********/
 async function submitOrder() {
   if (!CART.length) {
     showStatus('السلة فارغة، أضف أصنافاً أولاً.', false);
@@ -811,15 +811,32 @@ async function submitOrder() {
   }
 
   const customerName = document.getElementById('customerName').value.trim();
-  const phone = document.getElementById('phone').value.trim();
+  let phone = document.getElementById('phone').value.trim();
   const address = document.getElementById('address').value.trim();
   const delivery = document.getElementById('delivery').value;
   const notes = document.getElementById('notes').value.trim();
 
-  if (!customerName || !phone) {
-    showStatus('الرجاء إدخال الاسم ورقم الموبايل.', false);
+  if (!customerName) {
+    showStatus('الرجاء إدخال الاسم.', false);
     return;
   }
+
+  // 🔹 تنظيف رقم الموبايل من أي رموز غير أرقام
+  phone = phone.replace(/\D/g, '');
+
+  // 🔹 لو المستخدم كتب 9 أرقام وبدأت بـ 9 → نضيف 0 في البداية (مثال: 957... → 0957...)
+  if (phone.length === 9 && phone.startsWith('9')) {
+    phone = '0' + phone;
+  }
+
+  // 🔹 التحقق: يجب أن يكون بالشكل 09XXXXXXXX (10 أرقام ويبدأ بـ 09)
+  if (!/^09\d{8}$/.test(phone)) {
+    showStatus('رقم الموبايل غير صحيح، يجب أن يكون مثل: 09XXXXXXXX', false);
+    return;
+  }
+
+  // نحدّث الحقل بالقيمة المنسّقة
+  document.getElementById('phone').value = phone;
 
   const total = CART.reduce((sum, item) => sum + item.price * item.qty, 0);
   const order = {
@@ -832,10 +849,12 @@ async function submitOrder() {
     total
   };
 
-  showStatus('جاري إرسال الطلب...', true);
+  const btn = document.getElementById('submitOrderBtn');
+  btn.disabled = true;
+  btn.textContent = 'جاري إرسال الطلب...';
+  showStatus('', true);
 
   try {
-    // نرسل الطلب بوضع no-cors لتفادي مشكلة CORS
     await fetch(API_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -846,6 +865,7 @@ async function submitOrder() {
       'تم إرسال الطلب بنجاح 🎉 سيتم التواصل معك لتأكيد الطلب. المجموع: ' + total + ' ل.س',
       true
     );
+
     CART = [];
     renderCart();
     document.getElementById('notes').value = '';
@@ -856,8 +876,12 @@ async function submitOrder() {
     localStorage.setItem('customerAddress', address);
   } catch (err) {
     showStatus('تعذر إرسال الطلب (مشكلة في الاتصال بالإنترنت). حاول مرة أخرى.', false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'إرسال الطلب';
   }
 }
+
 
   function showStatus(msg, success) {
     const s = document.getElementById('status');
@@ -867,53 +891,79 @@ async function submitOrder() {
 
   document.getElementById('submitOrderBtn').addEventListener('click', submitOrder);
 
-  /*********** تتبع الطلب ***********/
-  async function trackOrders() {
-    const orderId = document.getElementById('trackOrderId').value.trim();
-    const phone = document.getElementById('trackPhone').value.trim();
-    const resultDiv = document.getElementById('trackResult');
-    resultDiv.textContent = 'جاري البحث...';
+/*********** تتبع الطلب ***********/
+async function trackOrders() {
+  const orderId = document.getElementById('trackOrderId').value.trim();
+  const phone = document.getElementById('trackPhone').value.trim();
+  const resultDiv = document.getElementById('trackResult');
+  resultDiv.textContent = 'جاري البحث...';
 
-    if (!orderId && !phone) {
-      resultDiv.textContent = 'أدخل رقم الطلب أو رقم الموبايل.';
+  if (!orderId && !phone) {
+    resultDiv.textContent = 'أدخل رقم الطلب أو رقم الموبايل.';
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams();
+    params.set('action', 'trackOrders');
+    if (orderId) params.set('orderId', orderId);
+    if (phone) params.set('phone', phone);
+
+    const res = await fetch(API_URL + '?' + params.toString());
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'خطأ في التتبع');
+
+    let orders = data.orders || [];
+    if (!orders.length) {
+      resultDiv.textContent = 'لا توجد طلبات مطابقة.';
       return;
     }
 
-    try {
-      const params = new URLSearchParams();
-      params.set('action', 'trackOrders');
-      if (orderId) params.set('orderId', orderId);
-      if (phone) params.set('phone', phone);
+    // 🔹 ترتيب من الأحدث إلى الأقدم (احتياطاً)
+    orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      const res = await fetch(API_URL + '?' + params.toString());
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'خطأ في التتبع');
+    let html = '';
+    orders.forEach((o, idx) => {
+      const badge = getStatusBadge_(o.status);
 
-      const orders = data.orders || [];
-      if (!orders.length) {
-        resultDiv.textContent = 'لا توجد طلبات مطابقة.';
-        return;
+      // نحاول قراءة الأصناف من itemsJson
+      let itemsHtml = '';
+      try {
+        const items = JSON.parse(o.itemsJson || '[]');
+        if (items.length) {
+          itemsHtml = '<ul style="margin:4px 0 0; padding-right:18px; font-size:0.8rem;">' +
+            items.map(i => `<li>${escapeHtml_(i.name)} × ${i.qty} = ${i.price * i.qty} ل.س</li>`).join('') +
+            '</ul>';
+        }
+      } catch (e) {
+        // تجاهل الخطأ ونتركها فارغة
       }
 
-      let html = '';
-      orders.forEach(o => {
-        const badge = getStatusBadge_(o.status);
-        html += `
-          <div class="track-card">
-            <div><strong>رقم الطلب:</strong> ${o.order_id}</div>
-            <div><strong>التاريخ:</strong> ${escapeHtml_(formatDateTime_(o.timestamp))}</div>
-            <div><strong>الحالة:</strong> <span class="track-status">${badge}</span></div>
-            <div><strong>المجموع:</strong> ${o.total} ل.س</div>
-          </div>
-        `;
-      });
+      const isLatest = (idx === 0);
+      html += `
+        <div class="track-card">
+          ${isLatest ? '<div style="font-size:0.8rem; color:#b94716; margin-bottom:4px;">🔔 هذا هو آخر طلب مسجّل لهذا الرقم</div>' : ''}
+          <div><strong>رقم الطلب:</strong> ${o.order_id}</div>
+          <div><strong>الاسم:</strong> ${escapeHtml_(o.customerName || '')}</div>
+          <div><strong>الهاتف:</strong> ${escapeHtml_(o.phone || '')}</div>
+          <div><strong>العنوان:</strong> ${escapeHtml_(o.address || '')}</div>
+          <div><strong>طريقة الاستلام:</strong> ${escapeHtml_(o.delivery || '')}</div>
+          <div><strong>الملاحظات:</strong> ${escapeHtml_(o.notes || '')}</div>
+          <div><strong>التاريخ:</strong> ${escapeHtml_(formatDateTime_(o.timestamp))}</div>
+          <div><strong>الحالة:</strong> <span class="track-status">${badge}</span></div>
+          <div><strong>المجموع:</strong> ${o.total} ل.س</div>
+          ${itemsHtml ? '<div><strong>الأصناف:</strong>' + itemsHtml + '</div>' : ''}
+        </div>
+      `;
+    });
 
-      resultDiv.innerHTML = html;
+    resultDiv.innerHTML = html;
 
-    } catch (err) {
-      resultDiv.textContent = 'حدث خطأ: ' + err.message;
-    }
+  } catch (err) {
+    resultDiv.textContent = 'حدث خطأ: ' + err.message;
   }
+}
+
 
   function getStatusBadge_(status) {
     const s = status || 'جديد';
