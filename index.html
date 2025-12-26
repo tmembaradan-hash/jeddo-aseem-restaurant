@@ -804,60 +804,60 @@
   }
 
   /*********** إرسال الطلب ***********/
-  async function submitOrder() {
-    if (!CART.length) {
-      showStatus('السلة فارغة، أضف أصنافاً أولاً.', false);
-      return;
-    }
-
-    const customerName = document.getElementById('customerName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const delivery = document.getElementById('delivery').value;
-    const notes = document.getElementById('notes').value.trim();
-
-    if (!customerName || !phone) {
-      showStatus('الرجاء إدخال الاسم ورقم الموبايل.', false);
-      return;
-    }
-
-    const total = CART.reduce((sum, item) => sum + item.price * item.qty, 0);
-    const order = {
-      customerName,
-      phone,
-      address,
-      delivery,
-      notes,
-      items: CART,
-      total
-    };
-
-    showStatus('جاري إرسال الطلب...', true);
-
-    try {
-      // no-cors لتفادي مشكلة CORS في Google Apps Script
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({ action: 'submitOrder', order })
-      });
-
-      showStatus(
-        'تم إرسال الطلب بنجاح 🎉 سيتم التواصل معك لتأكيد الطلب. المجموع: ' + total + ' ل.س',
-        true
-      );
-      CART = [];
-      renderCart();
-      document.getElementById('notes').value = '';
-
-      // حفظ بيانات الزبون محلياً
-      localStorage.setItem('customerPhone', phone);
-      localStorage.setItem('customerName', customerName);
-      localStorage.setItem('customerAddress', address);
-    } catch (err) {
-      showStatus('تعذر إرسال الطلب (مشكلة في الاتصال بالإنترنت). حاول مرة أخرى.', false);
-    }
+async function submitOrder() {
+  if (!CART.length) {
+    showStatus('السلة فارغة، أضف أصنافاً أولاً.', false);
+    return;
   }
+
+  const customerName = document.getElementById('customerName').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  const delivery = document.getElementById('delivery').value;
+  const notes = document.getElementById('notes').value.trim();
+
+  if (!customerName || !phone) {
+    showStatus('الرجاء إدخال الاسم ورقم الموبايل.', false);
+    return;
+  }
+
+  const total = CART.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const order = {
+    customerName,
+    phone,
+    address,
+    delivery,
+    notes,
+    items: CART,
+    total
+  };
+
+  showStatus('جاري إرسال الطلب...', true);
+
+  try {
+    // نرسل الطلب بوضع no-cors لتفادي مشكلة CORS
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ action: 'submitOrder', order })
+    });
+
+    showStatus(
+      'تم إرسال الطلب بنجاح 🎉 سيتم التواصل معك لتأكيد الطلب. المجموع: ' + total + ' ل.س',
+      true
+    );
+    CART = [];
+    renderCart();
+    document.getElementById('notes').value = '';
+
+    // حفظ بيانات الزبون محلياً لتسهيل الطلب القادم
+    localStorage.setItem('customerPhone', phone);
+    localStorage.setItem('customerName', customerName);
+    localStorage.setItem('customerAddress', address);
+  } catch (err) {
+    showStatus('تعذر إرسال الطلب (مشكلة في الاتصال بالإنترنت). حاول مرة أخرى.', false);
+  }
+}
 
   function showStatus(msg, success) {
     const s = document.getElementById('status');
@@ -1030,29 +1030,30 @@
     `;
   }
 
-  async function changeAdminStatus(orderId, newStatus) {
-    if (!ADMIN_TOKEN) return;
-    try {
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({
-          action: 'updateOrderStatus',
-          adminPassword: ADMIN_TOKEN,
-          orderId,
-          newStatus
-        })
-      });
+async function changeAdminStatus(orderId, newStatus) {
+  if (!ADMIN_TOKEN) return;
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        action: 'updateOrderStatus',
+        adminPassword: ADMIN_TOKEN,
+        orderId,
+        newStatus
+      })
+    });
 
-      document.getElementById('adminStatus').textContent =
-        'تم تحديث حالة الطلب ' + orderId + ' إلى "' + newStatus + '".';
-      document.getElementById('adminStatus').className = 'status-message success';
-    } catch (err) {
-      document.getElementById('adminStatus').textContent =
-        'خطأ في تحديث الحالة (تحقق من الاتصال بالإنترنت).';
-      document.getElementById('adminStatus').className = 'status-message error';
-    }
+    document.getElementById('adminStatus').textContent =
+      'تم تحديث حالة الطلب ' + orderId + ' إلى "' + newStatus + '".';
+    document.getElementById('adminStatus').className = 'status-message success';
+  } catch (err) {
+    document.getElementById('adminStatus').textContent =
+      'خطأ في تحديث الحالة (تحقق من الاتصال بالإنترنت).';
+    document.getElementById('adminStatus').className = 'status-message error';
   }
+}
+
 
   async function refreshSingleOrder(orderId) {
     await loadAdminOrders();
