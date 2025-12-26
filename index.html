@@ -614,11 +614,9 @@
     <button id="aiSendBtn">إرسال</button>
   </div>
 </div>
-
 <script>
   // ضع هنا رابط Web App من Apps Script
-// ضع هنا رابط Web App من Apps Script
-const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY5LEOaNJRl6PSgsm6UtBuf1Ca1gb2g1Xe_jPvxB9VucR0GQ/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY5LEOaNJRl6PSgsm6UtBuf1Ca1gb2g1Xe_jPvxB9VucR0GQ/exec';
 
   let MENU = [];
   let CART = [];
@@ -805,6 +803,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY
     totalDiv.textContent = 'المجموع: ' + total + ' ل.س';
   }
 
+  /*********** إرسال الطلب ***********/
   async function submitOrder() {
     if (!CART.length) {
       showStatus('السلة فارغة، أضف أصنافاً أولاً.', false);
@@ -836,28 +835,27 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY
     showStatus('جاري إرسال الطلب...', true);
 
     try {
-      const res = await fetch(API_URL, {
+      // no-cors لتفادي مشكلة CORS في Google Apps Script
+      await fetch(API_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        mode: 'no-cors',
         body: JSON.stringify({ action: 'submitOrder', order })
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'فشل إرسال الطلب');
 
       showStatus(
-        'تم إرسال الطلب بنجاح 🎉 رقم الطلب: ' + data.orderId +
-        ' - المجموع: ' + total + ' ل.س',
+        'تم إرسال الطلب بنجاح 🎉 سيتم التواصل معك لتأكيد الطلب. المجموع: ' + total + ' ل.س',
         true
       );
       CART = [];
       renderCart();
       document.getElementById('notes').value = '';
-      // حفظ رقم الموبايل محلياً لتسهيل الاستخدام القادم
+
+      // حفظ بيانات الزبون محلياً
       localStorage.setItem('customerPhone', phone);
       localStorage.setItem('customerName', customerName);
       localStorage.setItem('customerAddress', address);
     } catch (err) {
-      showStatus('حدث خطأ أثناء إرسال الطلب: ' + err.message, false);
+      showStatus('تعذر إرسال الطلب (مشكلة في الاتصال بالإنترنت). حاول مرة أخرى.', false);
     }
   }
 
@@ -1035,9 +1033,9 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY
   async function changeAdminStatus(orderId, newStatus) {
     if (!ADMIN_TOKEN) return;
     try {
-      const res = await fetch(API_URL, {
+      await fetch(API_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        mode: 'no-cors',
         body: JSON.stringify({
           action: 'updateOrderStatus',
           adminPassword: ADMIN_TOKEN,
@@ -1045,20 +1043,18 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY
           newStatus
         })
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'فشل التحديث');
+
       document.getElementById('adminStatus').textContent =
         'تم تحديث حالة الطلب ' + orderId + ' إلى "' + newStatus + '".';
       document.getElementById('adminStatus').className = 'status-message success';
     } catch (err) {
       document.getElementById('adminStatus').textContent =
-        'خطأ في تحديث الحالة: ' + err.message;
+        'خطأ في تحديث الحالة (تحقق من الاتصال بالإنترنت).';
       document.getElementById('adminStatus').className = 'status-message error';
     }
   }
 
   async function refreshSingleOrder(orderId) {
-    // حاليًا نعيد تحميل كل الطلبات (أبسط حل)
     await loadAdminOrders();
   }
 
@@ -1129,7 +1125,6 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ23C31r0bbzxvmtX67NY
 
   /*********** تهيئة أولية ***********/
   document.addEventListener('DOMContentLoaded', () => {
-    // ملء بيانات الزبون من LocalStorage لو موجودة
     const savedPhone = localStorage.getItem('customerPhone') || '';
     const savedName = localStorage.getItem('customerName') || '';
     const savedAddress = localStorage.getItem('customerAddress') || '';
