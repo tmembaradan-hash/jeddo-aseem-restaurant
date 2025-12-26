@@ -481,6 +481,36 @@
       font-size: 0.75rem;
     }
 
+    /* زر واتساب عائم */
+    .whatsapp-button {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #25D366;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      cursor: pointer;
+      z-index: 1000;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .whatsapp-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+
+    .whatsapp-button svg {
+      width: 28px;
+      height: 28px;
+      display: block;
+    }
+
     /* AI Assistant */
     .ai-button {
       position: fixed;
@@ -720,6 +750,14 @@
   مطعم جدو عاصم © 2025 — تم تطوير هذا التطبيق بواسطة محمود البردان · 0957482415
 </div>
 
+<!-- زر واتساب -->
+<div class="whatsapp-button" onclick="openWhatsApp()" aria-label="التواصل عبر واتساب">
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <circle cx="16" cy="16" r="16" fill="none"></circle>
+    <path fill="#ffffff" d="M16 6.4c-4.7 0-8.6 3.7-8.6 8.3 0 1.5.4 2.9 1.2 4.2l-0.8 3 3.1-0.8c1.2.7 2.6 1.1 4.1 1.1 4.7 0 8.6-3.7 8.6-8.3S20.7 6.4 16 6.4zm0 14.7c-1.3 0-2.6-.3-3.7-1l-0.3-.2-1.9.5.5-1.8-0.2-.3c-.7-1-1.1-2.2-1.1-3.4 0-3.4 2.8-6.1 6.3-6.1s6.3 2.7 6.3 6.1-2.8 6.1-6.3 6.1zm3.4-4.6c-0.2-.1-1.3-.6-1.5-.7s-.4-.1-.6.1c-.2.2-.7.7-.8.8-.1.1-.3.2-.6.1s-1.2-.5-2.3-1.5c-.8-.7-1.3-1.6-1.4-1.8s0-0.4.1-0.5c.1-.1.2-.3.3-.4.1-.1.1-.2.2-.3.1-.1.1-.2.2-.3.1-.1.1-.2.2-.3.1-.1.1-.2.2-.3.1-.1.1-.2.2-.3 0-.1 0-.2 0-.3s0-.2 0-.3c0-.1-.1-.3-.2-.4-.1-.1-.6-1.4-.9-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2s.9 2.4 1 2.5c.1.1 1.8 2.9 4.3 4.1.6.3 1.1.5 1.5.6.6.2 1.1.2 1.5.1.5-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.4-.2z"></path>
+  </svg>
+</div>
+
 <!-- زر مساعد الذكاء -->
 <button class="ai-button" id="aiButton">🤖</button>
 
@@ -738,7 +776,10 @@
 
 <script>
   // رابط Web App من Apps Script (العامِل حالياً)
-const API_URL = "https://script.google.com/macros/s/AKfycbwoLTzrfjvEf0siwpYuASaLiyYOvpub_5Yy0vtIia53VaX145ohQ0yH5XXecBl-RPQpCg/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwoLTzrfjvEf0siwpYuASaLiyYOvpub_5Yy0vtIia53VaX145ohQ0yH5XXecBl-RPQpCg/exec";
+
+  // رقم الواتساب للمطعم (بدون +)
+  const WHATSAPP_PHONE = "963957482415";
 
   let MENU = [];
   let CART = [];
@@ -1031,6 +1072,44 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwoLTzrfjvEf0siwpYuASaL
   }
 
   document.getElementById('submitOrderBtn').addEventListener('click', submitOrder);
+
+  /*********** زر واتساب – إرسال محتوى السلة ***********/
+  function openWhatsApp() {
+    const base = "https://wa.me/" + WHATSAPP_PHONE;
+
+    let lines = [];
+    if (CART.length) {
+      const customerName = document.getElementById('customerName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const delivery = document.getElementById('delivery').value;
+      const notes = document.getElementById('notes').value.trim();
+      const total = CART.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+      lines.push("مرحبا، أريد تأكيد هذا الطلب من تطبيق مطعم جدو عاصم:");
+      lines.push("");
+
+      CART.forEach(item => {
+        lines.push("- " + item.name + " × " + item.qty + " = " + (item.price * item.qty) + " ل.س");
+      });
+
+      lines.push("");
+      lines.push("المجموع: " + total + " ل.س");
+
+      if (customerName) lines.push("الاسم: " + customerName);
+      if (phone)       lines.push("هاتف الزبون: " + phone);
+      if (address)     lines.push("العنوان: " + address);
+      if (delivery)    lines.push("طريقة الاستلام: " + (delivery === "delivery" ? "توصيل" : "استلام من المطعم"));
+      if (notes)       lines.push("ملاحظات: " + notes);
+
+    } else {
+      lines.push("مرحبا، أريد الاستفسار عن قائمة الطعام في مطعم جدو عاصم.");
+    }
+
+    const text = encodeURIComponent(lines.join("\n"));
+    const url = base + "?text=" + text;
+    window.open(url, "_blank");
+  }
 
   /*********** تتبع الطلب ***********/
   async function trackOrders() {
